@@ -1,0 +1,22 @@
+{
+  "name": "@myolog/components",
+  "version": "0.0.1",
+  "description": "astro components for myolog",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./card" : "./Card/index.ts"
+  },
+  "files": [
+    "index.ts",
+    "**/*.astro"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "N_Joy_Shadow",
+  "license": "MIT",
+  "peerDependencies": {
+    "astro": ">=5.0.0"
+  }
+}
