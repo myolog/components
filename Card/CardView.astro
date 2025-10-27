@@ -6,16 +6,3 @@ const { style } = Astro.props;
 	<slot />
 </div>
 
-<script>
-	import { navigate } from "astro:transitions/client";
-
-	document.addEventListener("astro:page-load", () => {
-		const cards = document.querySelectorAll(".card");
-
-		cards.forEach((card) => {
-			card.addEventListener("click", () => {
-				navigate(card.getAttribute("data-url") ?? "/");
-			});
-		});
-	});
-</script>

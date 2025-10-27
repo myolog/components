@@ -1,3 +1,35 @@
 ﻿---
-$END$
+import "./Paegfind.astro.css"
+import Search from "astro-pagefind/components/Search"
 ---
+<div id="pagefind" hidden class="fixed top-0 left-0 w-full h-full text-pink-400 z-[11] acrylic">
+    <div class="pagefind-container relative" >
+        <Search className="pagefind-ui"/>
+    </div>
+</div>
+
+<script>
+    const pagefindEl: HTMLDivElement = document.querySelector('#pagefind')!;
+    const searchInputEl: HTMLInputElement = document.querySelector(".pagefind-ui__search-input")!
+    const pagefindResult: HTMLDivElement = document.querySelector(".pagefind-ui__drawer")!
+
+    document.addEventListener("keydown", e => {
+        if (isSearchShortcut(e)) {
+            e.preventDefault();
+            pagefindEl.hidden = !pagefindEl.hidden
+        }
+        if (!pagefindEl.hidden) {
+            searchInputEl.focus();
+            document.body.classList.add("overflow-hidden")
+        } else {
+            document.body.classList.remove("overflow-hidden")
+        }
+    })
+
+    searchInputEl.addEventListener("input", _ => {
+        pagefindResult.scrollTo({top: 0, behavior: "smooth"})
+    })
+    function isSearchShortcut(e: KeyboardEvent) {
+        return (e.key === '/' || (e.ctrlKey && e.key === 'k'))
+    }
+</script>

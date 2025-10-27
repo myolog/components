@@ -1,8 +1,14 @@
 ---
 import "./Breadcrumb.css"
 
+export interface Props {
+  containLastUrl?: boolean
+}
+
 const urlObj = new URL(Astro.request.url);
 const segments = urlObj.pathname.split('/').filter(Boolean);
+const { containLastUrl } = Astro.props
+
 let accumulatedPath = '/';
 ---
 
@@ -13,7 +19,7 @@ let accumulatedPath = '/';
       </li>
       {segments.map((segment, index) => {
         accumulatedPath += segment + '/';
-        const isLast = index === segments.length - 1;
+        const isLast = index === (containLastUrl ? segments.length : segments.length - 1);
         if(!isLast) {
             return (<li>
             {!isLast && <a href={accumulatedPath}>{segment}</a>}

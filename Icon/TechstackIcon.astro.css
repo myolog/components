@@ -1,0 +1,18 @@
+.icon-container { 
+    position: relative;
+
+    &:hover {
+        &::after {
+            display: block;
+        }
+    }
+
+
+    &::after {
+        position: absolute;
+        display: none;
+        /*content: attr(data-iconname);*/
+    }
+
+
+}

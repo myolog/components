@@ -1,0 +1,9 @@
+.framework-card {
+    & img {
+        object-fit: fill;
+    }
+}
+
+.framework-card-title {
+    margin: 0 !important;
+}
