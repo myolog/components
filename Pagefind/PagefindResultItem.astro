@@ -1,0 +1,108 @@
+---
+
+---
+
+<script>
+	// Define a light, reusable Web Component to render a single search result
+
+import { hover, press, animate } from "motion";
+
+	// It accepts attributes and renders sections only when data exists.
+	class PagefindResultItem extends HTMLElement {
+		static get observedAttributes() {
+			return [
+				'href',
+				'title',
+				'excerpt',
+				'image',
+				'category',
+				'readtime',
+			];
+		}
+
+		connectedCallback() {
+			this.render();
+
+            hover(this,(el) => {
+                animate(el, { scale: 1.01 })
+                return () => animate(el, { scale: 1 })
+            })
+
+            press(this,(el) => {
+                animate(el, { scale: 0.99 })
+                return () => animate(el, { scale: 1})
+            })
+		}
+
+		attributeChangedCallback() {
+			// Re-render on any attribute change
+			this.render();
+		}
+
+		/** @param {string} name */
+		getAttr(name: string) {
+			const v = this.getAttribute(name);
+			return v == null || v === 'undefined' || v === 'null' ? '' : v;
+		}
+
+		/** @param {string} text */
+		escapeHtml(text: string) {
+			return (text ?? '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;');
+		}
+
+		render() {
+            const defualtThumb = '/blog-placeholder-about'
+
+			const href = this.getAttr('href');
+			const title = this.getAttr('title');
+			const excerpt = this.getAttr('excerpt');
+			const image = this.getAttr('image');
+			const category = this.getAttr('category');
+			const readtime = this.getAttr('readtime');
+
+			// Build conditional blocks
+			const imageBlock = 
+				`<div class="shrink-0 w-16 h-16 rounded-lg overflow-hidden">
+						<img src="${this.escapeHtml(image ?? defualtThumb)}" alt="${this.escapeHtml(title)}" class="w-full h-full object-cover"/>
+					</div>`
+
+			const excerptBlock = `<p class="text-xs line-clamp-2 mb-2 text-black/60 dark:text-white/60">${this.escapeHtml(excerpt)}</p>`
+				
+
+			const metaItems = [
+				category
+					? `<span class="px-2 py-0.5 rounded-full bg-black/10 text-black/80 dark:bg-white/10 dark:text-white/80">${this.escapeHtml(category)}</span>`
+					: '',
+				readtime
+					? `<span class="text-black/40 dark:text-white/40">${this.escapeHtml(readtime)}</span>`
+					: '',
+			].filter(Boolean);
+
+			const metaBlock = metaItems.length
+				? `<div class="flex items-center gap-3 text-xs">${metaItems.join('')}</div>`
+				: '';
+
+			this.innerHTML = `
+				<a href="${this.escapeHtml(href)}" class="search-result-item w-full text-left p-4 rounded-xl backdrop-blur-xl border transition-all bg-black/5 border-black/10 hover:bg-black/10 hover:border-black/20 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-white/20">
+					<div class="flex gap-4">
+						${imageBlock}
+						<div class="flex-1 min-w-0">
+							<h3 class="text-sm mb-1 truncate text-black dark:text-white">${this.escapeHtml(title)}</h3>
+							${excerptBlock}
+							${metaBlock}
+						</div>
+					</div>
+				</a>
+			`;
+		}
+	}
+
+	if (!customElements.get('pagefind-result-item')) {
+		customElements.define('pagefind-result-item', PagefindResultItem);
+	}
+</script>

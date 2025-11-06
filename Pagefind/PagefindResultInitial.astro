@@ -1,0 +1,15 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { HTMLAttributes } from 'astro/types';
+
+export interface Props extends HTMLAttributes<"div"> {}
+---
+<div {...Astro.props} class="p-12 text-center" id="pagefind-result-initial">
+  <Icon
+    name="lucide:search"
+    class="w-12 h-12 mx-auto mb-3 text-black/30 dark:text-white/30"
+  />
+  <p class="text-sm text-black/60 dark:text-white/60">
+    검색어를 입력하세요
+  </p>
+</div>

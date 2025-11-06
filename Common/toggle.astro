@@ -1,0 +1,82 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cva, type VariantProps } from "class-variance-authority";
+export const toggleVariants = cva(
+  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium hover:bg-muted hover:text-muted-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-[color,box-shadow] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap",
+  {
+    variants: {
+      variant: {
+        default: "bg-transparent",
+        outline:
+          "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+      },
+      size: {
+        default: "h-9 px-2 min-w-9",
+        sm: "h-8 px-1.5 min-w-8",
+        lg: "h-10 px-2.5 min-w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  },
+);
+
+export interface Props
+  extends HTMLAttributes<"button">,
+    VariantProps<typeof toggleVariants> {
+
+  defaultPressed?: boolean;
+}
+
+const {
+  variant,
+  size,
+  class: className,
+  defaultPressed = false,
+  ...props
+} = Astro.props;
+
+// 4. 최종 클래스 계산
+const classes = toggleVariants({ variant, size, className });
+---
+
+<button
+  type="button"
+  class:list={classes}
+  data-astro-toggle
+  aria-pressed={defaultPressed ? "true" : "false"}
+  data-state={defaultPressed ? "on" : "off"}
+  {...props}
+>
+  <slot />
+</button>
+
+<script>
+  // 페이지에 있는 모든 'data-astro-toggle' 버튼을 찾습니다.
+  const toggleButtons = document.querySelectorAll(
+    "button[data-astro-toggle]",
+  );
+
+  toggleButtons.forEach((button) => {
+    // 스크립트가 중복 실행되어도 리스너가 중복 등록되지 않도록 방지합니다.
+    ///@ts-ignore
+    if (button.dataset.listenerAttached) return;
+    ///@ts-ignore
+    button.dataset.listenerAttached = "true";
+
+    button.addEventListener("click", () => {
+      if (button.hasAttribute("disabled")) {
+        return;
+      }
+
+      const isPressed = button.getAttribute("aria-pressed") === "true";
+      const newState = !isPressed;
+
+      button.setAttribute("aria-pressed", newState ? "true" : "false");
+      
+      button.setAttribute("data-state", newState ? "on" : "off");
+    });
+  });
+</script>

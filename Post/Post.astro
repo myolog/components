@@ -1,0 +1,224 @@
+---
+// 1. astro-icon/components에서 Icon 컴포넌트를 가져옵니다.
+import { Icon } from "astro-icon/components";
+import { Card } from "@myolog/components/card"
+// 2. Props 인터페이스에서 'theme' prop을 제거합니다.
+interface Props {
+	title: string;
+	excerpt: string;
+	date: string;
+	readTime: string;
+	category: string;
+	imageUrl: string;
+	featured?: boolean;
+	href?: string;
+}
+
+const {
+	title,
+	excerpt,
+	date,
+	readTime,
+	category,
+	imageUrl,
+	featured = false,
+	href,
+} = Astro.props;
+
+const selsectorClass = "blog-post-article"
+
+---
+
+<Card
+	data-selector={selsectorClass}
+	href={href}
+	class={selsectorClass}
+	featured={featured}
+>
+	<div class:list={[featured ? "md:flex md:flex-row" : "flex flex-col"]}>
+		<div
+			class:list={[
+				"relative overflow-hidden",
+				featured ? "md:w-1/2" : "w-full",
+			]}
+		>
+			<img
+				src={imageUrl}
+				alt={title}
+				class="blog-post-img w-full h-64 object-cover"
+			/>
+			<div class="blog-post-category-container absolute top-4 left-4">
+				<span
+					class:list={[
+						"blog-post-category-badge",
+						"px-3 py-1 text-xs backdrop-blur-xl rounded-full border",
+						// 'dark:' 변형 적용
+						"bg-black/90 text-white border-black/30",
+						"dark:bg-white/90 dark:text-black dark:border-white/30",
+					]}
+				>
+					{category}
+				</span>
+			</div>
+		</div>
+
+		<div
+			class:list={[
+				"p-6",
+				featured
+					? "md:w-1/2 md:flex md:flex-col md:justify-center"
+					: "",
+			]}
+		>
+			<h3
+				class:list={[
+					"mb-3 transition-colors duration-300",
+					// 'dark:' 변형 적용
+					"text-black group-hover:text-gray-700",
+					"dark:text-white dark:group-hover:text-gray-300",
+				]}
+			>
+				{title}
+			</h3>
+
+			<p class="mb-4 line-clamp-3 text-black/70 dark:text-white/70">
+				{excerpt}
+			</p>
+
+			<div
+				class="flex items-center gap-4 mb-4 text-black/60 dark:text-white/60"
+			>
+				<div class="flex items-center gap-1">
+					<Icon name="lucide:calendar" class="w-4 h-4" />
+					<span class="text-sm">{date}</span>
+				</div>
+				<div class="flex items-center gap-1">
+					<Icon name="lucide:clock" class="w-4 h-4" />
+					<span class="text-sm">{readTime}</span>
+				</div>
+			</div>
+
+			<div
+				class:list={[
+					"blog-post-read-more",
+					"inline-flex items-center gap-2 group/btn",
+					// 'dark:' 변형 적용
+					"text-black hover:text-gray-700",
+					"dark:text-white dark:hover:text-gray-300",
+				]}
+			>
+				<span>Read More</span>
+				<div class="blog-post-arrow-icon">
+					<Icon name="lucide:arrow-right" class="w-4 h-4" />
+				</div>
+			</div>
+		</div>
+	</div>
+</Card>
+
+<script>
+	import { animate, hover, inView } from "motion";
+
+	const articles = document.querySelectorAll("div[data-selector='blog-post-article']");
+
+	articles.forEach((article) => {
+		// 7. 현재 다크모드 상태를 확인하는 함수
+		const getIsDark = () => {
+			return document.documentElement.classList.contains("dark");
+		};
+
+		hover(article, (el) => {
+			const isDark = getIsDark();
+			const hoverShadow = isDark
+				? "0 25px 50px -12px rgba(255,255,255,0.25)"
+				: "0 25px 50px -12px rgba(0,0,0,0.25)";
+
+			animate(
+				el,
+				{ scale: 1.03, y: -5, boxShadow: hoverShadow },
+				{ duration: 0.3, ease: "easeOut" }
+			);
+			return () => {
+				animate(
+					el,
+					{ scale: 1.03, y: 0, boxShadow: "none" },
+					{ duration: 0.3, ease: "easeOut" }
+				);
+			};
+		});
+
+		
+		inView(article, (el) => {
+			animate(el, { opacity: [0,1], x: [-20, 0] }, { duration: 0.5, delay: 0.2});
+		}, { amount: 0.5 });
+
+		// 2. Image Hover
+		const img = article.querySelector(".blog-post-img");
+		if (img) {
+			hover(img, (el) => {
+				animate(el, { scale: 1.1 }, { duration: 0.5 });
+				return () => {
+					animate(el, { scale: 1.0 }, { duration: 0.5 });
+				};
+			});
+		}
+
+		// 3. Category Badge (InView)
+		const categoryContainer = article.querySelector(
+			".blog-post-category-container"
+		);
+		if (categoryContainer) {
+			inView(
+				categoryContainer,
+				() => {
+					animate(
+						categoryContainer,
+						{ opacity: [0, 1], x: [-20, 0] },
+						{ duration: 0.5, delay: 0.2 }
+					);
+				},
+				{ amount: 0.5 }
+			);
+		}
+
+		// 4. Category Badge Hover
+		const categoryBadge = article.querySelector(
+			".blog-post-category-badge"
+		);
+		if (categoryBadge) {
+            hover(categoryBadge, () => {
+                animate(categoryBadge, { scale: 1.1, rotate: 5 });
+                return () => {
+                    animate(categoryBadge, { scale: 1.0, rotate: 0 }); 
+                }
+            })
+		}
+
+		// 5. Read More Button Hover
+		const readMoreBtn = article.querySelector(".blog-post-read-more");
+		if (readMoreBtn) {
+            hover(readMoreBtn, () => {
+                animate(readMoreBtn, { x: 5 }, { duration: 0.2 });
+                return () => {
+                    animate(readMoreBtn, { x: 0 }, { duration: 0.2 });
+                }
+            })
+		}
+
+		const arrowIcon = article.querySelector(".blog-post-arrow-icon");
+		if (arrowIcon) {
+			const stopInView = inView(
+				arrowIcon,
+				() => {
+					animate(
+						arrowIcon,
+						{ x: [0, 5, 0] },
+						{ duration: 1.5, repeat: Infinity }
+					);
+					stopInView()
+				},
+				{ amount: 0.5 }
+			);
+		}
+	});
+</script>

@@ -8,7 +8,9 @@
     "./card": "./Card/index.ts",
     "./breadcrumb": "./Breadcrumb/index.ts",
     "./pagefind": "./Pagefind/index.ts",
-    "./icon": "./Icon/index.ts"
+    "./icon": "./Icon/index.ts",
+    "./common": "./Common/index.ts",
+    "./post": "./Post/index.ts"
   },
   "files": [
     "index.ts",
@@ -20,7 +22,8 @@
   "author": "N_Joy_Shadow",
   "license": "MIT",
   "dependencies": {
-    "@pagefind/default-ui": "^1.4.0"
+    "@pagefind/default-ui": "^1.4.0",
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "astro": ">=5.0.0"

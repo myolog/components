@@ -1,0 +1,162 @@
+---
+import { Icon } from 'astro-icon/components';
+import { Card } from "@myolog/components/card";
+
+export interface Props { 
+    name: string
+    imageUrl: string
+    icon: string
+    count: number
+    description: string
+}
+
+const { name: categoryName,
+    imageUrl,
+    icon,
+    count,
+    description
+} = Astro.props
+
+---
+
+<Card
+  href={`/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}`}
+  class="category-card group relative overflow-hidden rounded-2xl backdrop-blur-xl border cursor-pointer bg-black/10 border-black/20 hover:bg-black/15 dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15"
+>
+  <div class="relative overflow-hidden h-48">
+    <img
+      src={imageUrl}
+      alt={categoryName}
+      class="category-card-img w-full h-full object-cover"
+    />
+    <div
+      class="absolute inset-0 bg-linear-to-t from-white/60 to-transparent dark:from-black/60"
+    >
+    </div>
+
+    <div class="category-card-icon-container absolute top-4 left-4">
+      <div
+        class="category-card-icon-badge p-3 backdrop-blur-xl rounded-xl border bg-black/90 text-white border-black/30 dark:bg-white/90 dark:text-black dark:border-white/30"
+      >
+        <Icon name={icon} class="w-6 h-6" />
+      </div>
+    </div>
+
+    <div class="category-card-count absolute top-4 right-4">
+      <span
+        class="px-3 py-1 text-xs backdrop-blur-xl rounded-full border bg-black/90 text-white border-black/30 dark:bg-white/90 dark:text-black dark:border-white/30"
+      >
+        {count} posts
+      </span>
+    </div>
+  </div>
+
+  <div class="p-6">
+    <h3
+      class="mb-2 transition-colors duration-300 text-black group-hover:text-gray-700 dark:text-white dark:group-hover:text-gray-300"
+    >
+      {categoryName}
+    </h3>
+
+    <p class="text-sm text-black/70 dark:text-white/70">
+      {description}
+    </p>
+
+    <div
+      class="category-card-explore mt-4 inline-flex items-center gap-2 text-black hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
+    >
+      <span class="text-sm">Explore</span>
+      <div class="category-card-arrow">
+        <Icon name="lucide:arrow-right" class="w-4 h-4" />
+      </div>
+    </div>
+  </div>
+</Card>
+
+<script>
+  import { animate, inView } from 'motion';
+
+  const cards = document.querySelectorAll('.category-card');
+
+  cards.forEach((card) => {
+    // 1. 데이터 속성에서 index(지연 시간용) 읽기
+    //@ts-ignore
+    const index = parseInt(card.dataset.index || '0', 10);
+    const baseDelay = index * 0.1;
+
+    // 2. 카드 진입 애니메이션 (스크롤 시 한 번 실행)
+    inView(
+      card,
+      () => {
+        // 2-1. 카드 본체 (React: initial, animate)
+        animate(
+          card,
+          { opacity: [0, 1], y: [30, 0] },
+          { duration: 0.5, delay: baseDelay, ease: 'easeOut' }
+        );
+        
+        // 2-2. 아이콘 뱃지 (React: initial, animate)
+        const iconContainer = card.querySelector('.category-card-icon-container');
+        if (iconContainer) {
+          animate(
+            iconContainer,
+            { opacity: [0, 1], scale: [0, 1] },
+            { duration: 0.5, delay: 0.2 + baseDelay }
+          );
+        }
+        
+        // 2-3. 포스트 카운트 (React: initial, animate)
+        const countBadge = card.querySelector('.category-card-count');
+        if (countBadge) {
+          animate(
+            countBadge,
+            { opacity: [0, 1], x: [20, 0] },
+            { duration: 0.5, delay: 0.3 + baseDelay }
+          );
+        }
+      }
+    );
+
+    // 3. 카드 호버 (React: whileHover)
+    card.addEventListener('mouseenter', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      const shadow = isDark
+        ? '0 25px 50px -12px rgba(255, 255, 255, 0.25)'
+        : '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+      animate(card, { scale: 1.03, y: -5, boxShadow: shadow });
+    });
+    card.addEventListener('mouseleave', () => {
+      animate(card, { scale: 1.0, y: 0, boxShadow: 'none' });
+    });
+
+    // 4. 이미지 호버 (React: whileHover)
+    const img = card.querySelector('.category-card-img');
+    if (img) {
+      img.addEventListener('mouseenter', () => animate(img, { scale: 1.1 }, { duration: 0.5 }));
+      img.addEventListener('mouseleave', () => animate(img, { scale: 1.0 }, { duration: 0.5 }));
+    }
+
+    // 5. 아이콘 뱃지 호버 (React: whileHover)
+    const iconBadge = card.querySelector('.category-card-icon-badge');
+    if (iconBadge) {
+      iconBadge.addEventListener('mouseenter', () => animate(iconBadge, { scale: 1.2, rotate: 360 }, { duration: 0.6 }));
+      iconBadge.addEventListener('mouseleave', () => animate(iconBadge, { scale: 1.0, rotate: 0 }, { duration: 0.6 }));
+    }
+
+    // 6. "Explore" 링크 호버 (React: whileHover)
+    const explore = card.querySelector('.category-card-explore');
+    if (explore) {
+      explore.addEventListener('mouseenter', () => animate(explore, { x: 5 }, { duration: 0.2 }));
+      explore.addEventListener('mouseleave', () => animate(explore, { x: 0 }, { duration: 0.2 }));
+    }
+
+    // 7. 화살표 아이콘 루프 (React: animate)
+    const arrow = card.querySelector('.category-card-arrow');
+    if (arrow) {
+      // 화면에 보일 때 루프 시작
+      inView(arrow, () => {
+        animate(arrow, { x: [0, 5, 0] }, { duration: 1.5, repeat: Infinity });
+      });
+    }
+  });
+</script>

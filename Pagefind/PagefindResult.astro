@@ -1,0 +1,153 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import PagefindResultItem from "./PagefindResultItem.astro";
+
+// Post 타입 예시 (필요에 맞게 수정하세요)
+export interface Post {
+	id: string;
+	href: string; // 'href'로 사용될 URL
+	title: string;
+	excerpt: string;
+	imageUrl: string;
+	category: string;
+	readTime: string;
+}
+
+export interface Props extends HTMLAttributes<"div"> {}
+
+---
+
+<pagefind-result {...Astro.props} class="p-3">
+	<p
+		id="pagefind-result-count"
+		class="px-3 py-2 text-xs text-black/60 dark:text-white/60"
+	>
+		검색 결과 0개
+	</p>
+	<div class="space-y-2" id="pagefind-result-container">
+	</div>
+</pagefind-result>
+
+<PagefindResultItem />
+
+<style> 
+	::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+</style>
+
+<script>
+
+	const pagefindResultEmptyEl: HTMLDivElement = document.querySelector("#pagefind-result-empty")!
+	const pagefindResultInitialEl: HTMLDivElement = document.querySelector("#pagefind-result-initial")!
+
+	interface Post {
+		id: string;
+		href: string; // 'href'로 사용될 URL
+		title: string;
+		excerpt: string;
+		imageUrl: string;
+		category: string;
+		readTime: string;
+	}
+
+	import { animate, hover, press, type AnimationOptions } from "motion";
+
+	class PagefindResult extends HTMLElement {
+		
+
+		_postData: Post[] = []; // 데이터를 저장할 내부 변수
+		_searchParam: string =  ""
+		_resultContainerEl = document.querySelector("#pagefind-result-container")!
+		_resultCountEl: HTMLParagraphElement = this.querySelector("#pagefind-result-count")!;
+
+		//아마 2번 렌더링이 될거 같은데 이거 해결 해야 되요!!
+		set post(data) {
+			if (!data || this._postData === data) return;
+
+			this._postData = data;
+
+			// 데이터가 설정되면 화면을 렌더링합니다.
+			this.render();
+		}
+
+		set searchParam(param: string) {
+			if (this._searchParam === param) return;
+			this._searchParam = param
+			this.render()
+		}
+
+		get post() {
+			this.render()
+			return this._postData;
+		}
+
+		get searchParam() {
+			this.render()
+			return this._searchParam
+		}
+
+		connectedCallback() {
+			if (!this._postData) {
+				this.render(); // 데이터가 없을 때의 기본 상태 렌더링
+			} else {
+			}
+			const resultCountEl: HTMLParagraphElement = this.querySelector(
+				"#pagefind-result-count"
+			)!;
+			resultCountEl.innerText = `검색 결과 ${this._postData.length}개`;
+		}
+
+		render() {
+			// _postData를 사용해 DOM을 구성합니다.
+			if(this._searchParam.length == 0) {
+				this.hidden = true
+				pagefindResultEmptyEl.hidden = true
+				pagefindResultInitialEl.hidden = false
+
+			}
+
+
+			if (this._postData && this._postData.length !== 0) {
+				this._resultCountEl.innerText = `검색 결과 ${this._postData.length}개`;
+				this._resultContainerEl.innerHTML = ''
+				for (const post of this._postData) {
+					const el = document.createElement('pagefind-result-item');
+					if (post?.href) el.setAttribute('href', String(post.href));
+					if (post?.title) el.setAttribute('title', String(post.title));
+					if (post?.excerpt) el.setAttribute('excerpt', String(post.excerpt));
+					if (post?.imageUrl) el.setAttribute('image', String(post.imageUrl));
+					if (post?.category) el.setAttribute('category', String(post.category));
+					if (post?.readTime) el.setAttribute('readtime', String(post.readTime));
+					this._resultContainerEl.appendChild(el);
+				}
+				this.hidden = false
+				pagefindResultEmptyEl.hidden = true
+				pagefindResultInitialEl.hidden = true
+			} else {
+				this.hidden = true
+				pagefindResultEmptyEl.hidden = false
+				pagefindResultInitialEl.hidden = true
+			}
+		}
+	}
+
+	customElements.define("pagefind-result", PagefindResult);
+
+	document.querySelectorAll(".search-result-item").forEach((item) => {
+		const option: AnimationOptions = { duration: 0.1 };
+
+		// 스크립트 중복 실행 방지
+		// if (item.dataset.motionAttached) return;
+		// item.dataset.motionAttached = 'true';
+
+		press(item, (el) => {
+			animate(el, { scale: 0.99 }, option);
+			return () => animate(el, { scale: 1.1 }, option);
+		});
+		hover(item, (el) => {
+			animate(el, { scale: 1.01 }, option);
+			return () => animate(el, { scale: 1.0 }, option);
+		});
+	});
+</script>

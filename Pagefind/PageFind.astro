@@ -1,35 +1,186 @@
 ﻿---
-import "./Paegfind.astro.css"
-import Search from "astro-pagefind/components/Search"
+import { Icon } from "astro-icon/components";
+
+import PagefindResult from "./PagefindResult.astro";
+import PagefindResultEmpty from "./PagefindResultEmpty.astro";
+import PagefindResultInitial from "./PagefindResultInitial.astro";
+
+// Minimal local types to satisfy TS in this file
+type PFResultItem = { 
+  data: () => Promise<any>
+  id: string,
+  word: number[]
+  weight: number
+};
+type PagefindInstance = {
+  init: (options?: Record<string, unknown>) => Promise<void>;
+  search: (
+    query: string,
+    options?: Record<string, unknown>
+  ) => Promise<{ results: PFResultItem[] }>;
+};
+declare global {
+  interface Window { pagefindInstance: PagefindInstance }
+}
 ---
-<div id="pagefind" hidden class="fixed top-0 left-0 w-full h-full text-pink-400 z-[11] acrylic">
-    <div class="pagefind-container relative" >
-        <Search className="pagefind-ui"/>
+
+<div
+  id="pagefind"
+  hidden
+  class="fixed inset-0 z-100 flex items-start justify-center pt-20 px-4"
+>
+  <div
+    id="pagefind-backdrop"
+    class="absolute inset-0 dark:bg-black/60 bg-black/40 backdrop-blur-sm"
+  ></div>
+
+  <div
+    id="pagefind-container"
+    class="relative w-full max-w-3xl rounded-2xl backdrop-blur-xl border shadow-2xl overflow-hidden
+    dark:bg-white/10 dark:border-white/20 bg-black/10 border-black/20"
+  >
+    <div class="flex items-center gap-3 px-6 py-4 border-b dark:border-white/10 border-black/10">
+      <Icon name="lucide:search" class="w-5 h-5 dark:text-white/60 text-black/60" />
+      <input
+        id="pagefind-input"
+        type="text"
+        placeholder="검색어를 입력하세요..."
+        class="flex-1 bg-transparent outline-none dark:text-white dark:placeholder:text-white/40 text-black placeholder:text-black/40"
+      />
+      <kbd class="px-2 py-1 rounded text-xs border dark:bg-white/10 dark:border-white/20 dark:text-white/60 bg-black/10 border-black/20 text-black/60">
+        ESC
+      </kbd>
     </div>
-</div>
 
-<script>
-    const pagefindEl: HTMLDivElement = document.querySelector('#pagefind')!;
-    const searchInputEl: HTMLInputElement = document.querySelector(".pagefind-ui__search-input")!
-    const pagefindResult: HTMLDivElement = document.querySelector(".pagefind-ui__drawer")!
+    <div id="pagefind-result" class="max-h-[60vh] overflow-y-auto">
+      <PagefindResult hidden />
+      <PagefindResultEmpty hidden />
+      <PagefindResultInitial />
+    </div>
+  </div>
 
-    document.addEventListener("keydown", e => {
-        if (isSearchShortcut(e)) {
-            e.preventDefault();
-            pagefindEl.hidden = !pagefindEl.hidden
-        }
-        if (!pagefindEl.hidden) {
-            searchInputEl.focus();
-            document.body.classList.add("overflow-hidden")
-        } else {
-            document.body.classList.remove("overflow-hidden")
-        }
-    })
+  <script>
+    // @ts-nocheck
+    import { animate, inView } from "motion";
 
-    searchInputEl.addEventListener("input", _ => {
-        pagefindResult.scrollTo({top: 0, behavior: "smooth"})
-    })
-    function isSearchShortcut(e: KeyboardEvent) {
-        return (e.key === '/' || (e.ctrlKey && e.key === 'k'))
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts);
+
+    const el = {
+      pagefind: $("#pagefind"),
+      backdrop: $("#pagefind-backdrop"),
+      container: $("#pagefind-container"),
+      input: $("#pagefind-input"),
+      resultScroll: $("#pagefind-result"),
+      result: document.querySelector("pagefind-result"),
+    };
+
+    if (!el.pagefind || !el.backdrop || !el.container || !el.input || !el.resultScroll || !el.result) {
+      console.error("Pagefind modal failed to initialize: missing elements");
     }
-</script>
+
+    if (el.container) {
+      inView(el.container, (node) => {
+        animate(node, { opacity: [0, 1], y: [-20, 0], scale: [0.95, 1] });
+      });
+    }
+
+    const isSearchShortcut = (e) => e.key === "/" || (e.ctrlKey && e.key.toLowerCase() === "k");
+    document.addEventListener("keydown", async (e) => {
+      if (e.key === "Escape") {
+        if (el.pagefind && !el.pagefind.hidden) await closeModal();
+        return;
+      }
+      if (!isSearchShortcut(e)) return;
+      e.preventDefault();
+      if (!el.pagefind) return;
+      if (el.pagefind.hidden) openModal();
+      else await closeModal();
+    });
+
+    on(el.backdrop, "click", () => closeModal());
+
+    const debounce = (fn, wait = 300) => {
+      let t = 0;
+      return (...args) => {
+        clearTimeout(t);
+        t = window.setTimeout(() => fn(...args), wait);
+      };
+    };
+
+    const COOLDOWN_MS = 1000;
+
+    const handleInput = async (e) => {
+      const value = (e.target?.value ?? "").toString();
+      if (el.result) el.result.searchParam = value;
+
+      const q = value.trim();
+      if (q.length < 2) return;
+
+      try {
+        const pagefind = window.pagefindInstance;
+        if (!pagefind || !pagefind.search) return;
+
+        const res = await pagefind.search(q);
+        const list = [];
+        for (const item of res.results || []) {
+          const data = await item.data();
+          list.push({
+            id: item.id,
+            href: data?.url || "#",
+            title: data?.meta?.title || "",
+            imageUrl: data?.meta?.image || "",
+            excerpt: data?.excerpt || "",
+          });
+        }
+
+        if (el.result) el.result.post = list;
+        if (el.resultScroll) el.resultScroll.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        console.error("Pagefind search failed", err);
+      }
+    };
+
+    const debouncedInput = debounce(handleInput, COOLDOWN_MS);
+    on(el.input, "input", debouncedInput);
+
+    function openModal() {
+      if (!el.pagefind || !el.backdrop || !el.container || !el.input) return;
+      el.pagefind.hidden = false;
+      document.body.classList.add("overflow-hidden");
+      el.backdrop.style.opacity = "1.0";
+      animate(el.container, { opacity: [0, 1], y: [-20, 0], scale: [0.95, 1] }, { duration: 0.2 });
+      el.input.focus();
+    }
+
+    async function closeModal() {
+      if (!el.pagefind || !el.container || !el.input) return;
+      el.input.value = "";
+      if (el.result) el.result.searchParam = "";
+      await animate(el.container, { opacity: [1, 0], y: [0, -20], scale: [1, 0.95] }, { duration: 0.2 }).finished;
+      el.pagefind.hidden = true;
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    window.addEventListener("pagefind:ready", () => {
+      // Ready
+    }, { once: true });
+  </script>
+
+  <script is:inline>
+    (async () => {
+      try {
+        // @ts-ignore
+        const pagefind = await import("/pagefind/pagefind.js");
+        await pagefind.init();
+
+        // @ts-ignore
+        window.pagefindInstance = pagefind;
+        window.dispatchEvent(new Event("pagefind:ready"));
+
+      } catch (e) {
+        console.error("Failed to load or init Pagefind:", e);
+      }
+    })();
+  </script>
+</div>

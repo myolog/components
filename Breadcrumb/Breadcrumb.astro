@@ -1,32 +1,45 @@
 ---
-import "./Breadcrumb.css"
-
+import { MyoUrl } from "@myolog/libs";
+import BreadcrumbItem from "./BreadcrumbItem.astro";
 export interface Props {
-  containLastUrl?: boolean
+	title?: string;
+	dropCount?: number;
 }
 
-const urlObj = new URL(Astro.request.url);
-const segments = urlObj.pathname.split('/').filter(Boolean);
-const { containLastUrl } = Astro.props
+const url = MyoUrl.of(Astro.request.url);
+let { title, dropCount = 0 } = Astro.props;
+const segments = url.split("/", dropCount);
 
-let accumulatedPath = '/';
+
+let accumulatedPath = "/";
+
+
 ---
 
-<div aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li>
-        <a href="/">Home</a>
-      </li>
-      {segments.map((segment, index) => {
-        accumulatedPath += segment + '/';
-        const isLast = index === (containLastUrl ? segments.length : segments.length - 1);
-        if(!isLast) {
-            return (<li>
-            {!isLast && <a href={accumulatedPath}>{segment}</a>}
-          </li>
-          )}
-      })}
-    </ol>
-</div>
+<nav aria-label="breadcrumb">
+	<ol class="flex flex-wrap items-center gap-2 text-sm">
+		<BreadcrumbItem title="home" path="/" index={-1}/>
+		{
+			segments.map((path, index) => {
+				accumulatedPath += path
+				return <BreadcrumbItem title={title ?? path} path={accumulatedPath} index={index} isLast={(segments.length - 1) === index}/>
+			})
+		}
+	</ol>
+</nav>
 
-  
+<script>
+	import { animate, hover, press } from "motion"
+	const navEl = document.querySelector("nav[aria-label='breadcrumb']")!
+	navEl.querySelectorAll("ol li > a").forEach((btn) => {
+		hover(btn, (el) => {
+			animate(el, { scale: 1.05 })
+			return () => animate(el , { scale: 1 })	
+		})
+		
+		press(btn, (el) => {
+			animate(el, { scale: 0.95})
+			return () => animate(el, {scale: 1})
+		})
+	})
+</script>
