@@ -11,7 +11,7 @@ let { title, dropCount = 0 } = Astro.props;
 const segments = url.split("/", dropCount);
 
 
-let accumulatedPath = "/";
+let accumulatedPath = "";
 
 
 ---
@@ -21,7 +21,7 @@ let accumulatedPath = "/";
 		<BreadcrumbItem title="home" path="/" index={-1}/>
 		{
 			segments.map((path, index) => {
-				accumulatedPath += path
+				accumulatedPath += `/${path}`
 				return <BreadcrumbItem title={title ?? path} path={accumulatedPath} index={index} isLast={(segments.length - 1) === index}/>
 			})
 		}
