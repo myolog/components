@@ -22,7 +22,8 @@ let accumulatedPath = "";
 		{
 			segments.map((path, index) => {
 				accumulatedPath += `/${path}`
-				return <BreadcrumbItem title={title ?? path} path={accumulatedPath} index={index} isLast={(segments.length - 1) === index}/>
+				const isLast = (segments.length - 1) === index
+				return <BreadcrumbItem title={isLast ? title ?? path : path} path={accumulatedPath} index={index} isLast={isLast}/>
 			})
 		}
 	</ol>
