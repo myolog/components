@@ -13,7 +13,6 @@ const {
 	href = undefined,
 } = Astro.props;
 
-//이거 왜 a태그 쓰면 고장남?
 ---
 
 <div
@@ -40,7 +39,14 @@ const {
 		return document.documentElement.classList.contains("dark");
 	};
 
-	document.querySelectorAll("div[data-myo-card]").forEach((card) =>
+	document.querySelectorAll("div[data-myo-card]").forEach((card) => {
+		const href = card.getAttribute("href")
+		if(href)  { 
+			card.addEventListener("click", (_) => { 
+				window.location.href =  href
+			})
+		}
+
 		hover(card, (el) => {
 			const isDark = getIsDark();
 			const hoverShadow = isDark
@@ -60,5 +66,5 @@ const {
 				);
 			};
 		})
-	);
+	});
 </script>

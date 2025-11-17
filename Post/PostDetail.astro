@@ -1,0 +1,93 @@
+---
+import { Icon } from 'astro-icon/components';
+import Badge from '../Common/badge.astro';
+import PostProfile from './PostProfile.astro';
+interface Props {
+  title: string;
+  publishTime: Date;
+  category: string;
+  heroImage: string;
+}
+
+const { title, publishTime, category, heroImage } = Astro.props;
+---
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4 items-start">
+  <div class="post-article-wrapper lg:col-span-9">
+    <article
+      class="rounded-2xl backdrop-blur-xl border overflow-hidden bg-black/10 border-black/20 dark:bg-white/10 dark:border-white/20"
+    >
+      <div class="relative h-96 overflow-hidden">
+        <img src={heroImage} alt={title} class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent"></div>
+        <div class="absolute bottom-6 left-6">
+          <Badge title={category} />
+        </div>
+      </div>
+
+      <div class="p-8 md:p-12">
+        <h1 class="mb-6 text-black dark:text-white text-3xl">
+          {title}
+        </h1>
+
+        <div
+          class="flex items-center gap-4 mb-8 pb-8 border-b text-sm border-black/10 text-black/60 dark:border-white/10 dark:text-white/60"
+        >
+          <div class="flex items-center gap-1">
+            <Icon name="lucide:calendar" class="w-4 h-4" />
+            <span>{publishTime.toLocaleDateString()}</span>
+          </div>
+
+        </div>
+
+        <div class="prose prose-myo dark:prose-invert max-w-none">
+          <slot /> 
+        </div>
+
+        <div class="flex items-center gap-4 mt-12 pt-8 border-t border-black/10 dark:border-white/10">
+          <button
+            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
+          >
+            <Icon name="lucide:thumbs-up" class="w-4 h-4" />
+            <span>124</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
+          >
+            <Icon name="lucide:bookmark" class="w-4 h-4" />
+            <span>Save</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
+          >
+            <Icon name="lucide:share-2" class="w-4 h-4" />
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+  <aside
+    class="post-sidebar-wrapper hidden lg:block lg:col-span-3 space-y-6 sticky top-20"
+  >
+    <PostProfile/>
+  </aside>
+</div>
+
+<script>
+  import { animate } from 'motion';
+
+  // Article 진입 애니메이션
+  animate(
+    '.post-article-wrapper',
+    { opacity: [0, 1], y: [30, 0] },
+    { duration: 0.6, delay: 0.2 }
+  );
+
+  // Sidebar 진입 애니메이션
+  animate(
+    '.post-sidebar-wrapper',
+    { opacity: [0, 1], x: [20, 0] },
+    { duration: 0.6, delay: 0.4 }
+  );
+</script>

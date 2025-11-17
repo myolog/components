@@ -10,7 +10,8 @@
     "./pagefind": "./Pagefind/index.ts",
     "./icon": "./Icon/index.ts",
     "./common": "./Common/index.ts",
-    "./post": "./Post/index.ts"
+    "./post": "./Post/index.ts",
+    "./category": "./Category/index.ts"
   },
   "files": [
     "index.ts",

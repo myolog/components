@@ -1,0 +1,79 @@
+---
+import { Icon } from 'astro-icon/components'
+
+export interface Props {
+    title: string,
+    description: string,
+    icon: string,
+    articleLength?: number
+}
+
+const { title, description, icon, articleLength = 0 } = Astro.props
+
+---
+
+<div id="category-header" class="mb-12 mt-8">
+    <di class="flex items-center gap-4 mb-4">
+        <div id="category-icon" class:list={["p-4 backdrop-blur-xl rounded-2xl border",
+                "dark:bg-white/90 text-black border-white/30",
+                "bg-black/90 text-white border-black/30"]}>
+            <Icon name={icon} class="w-8 h-8 dark:text-black"/>
+        </div>
+        <div>
+            <h1 id="category-title" class:list={["mb-2", "dark:text-white", "text-black"]}>
+                {title}
+            </h1>
+            <p id="category-description" class:list={["dark:text-white/70", "text-black"]}>
+                {description}
+            </p>
+        </div>
+    </di>
+    <div class="header-article-count-container" class:list={["inline-flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border",
+        "dark:bg-white/10 border-white/20",
+        "bg-black/10 border-black/20"
+    ]}>
+        <Icon name="lucide:book-open" class:list={["w-h h-4", "dark:text-white/80 text-black/80"]}/>
+        <span class:list={["text-sm", "dark:text-white/80", "text-black/80"]}>
+            {articleLength} articles
+        </span>
+    </div>
+</div>
+
+<script>
+    import { inView, animate } from "motion";
+
+    const container = document.querySelector("#category-header")!
+    const headerIcon = document.querySelector("#category-icon")!
+    const headerTitle = document.querySelector("#category-title")!
+    const headerDescription = document.querySelector("#category-description")!
+
+    inView(container, () => {
+    
+        animate(
+        container,
+        { opacity: [0, 1], y: [-20, 0] },
+        { duration: 0.6 }
+        );
+
+        animate(
+        headerIcon,
+        { scale: [0, 1], rotate: [-180, 0] },
+        { duration: 0.6, delay: 0.2 }
+        );
+
+        animate(
+        headerTitle,
+        { opacity: [0, 1], x: [-20, 0] },
+        { duration: 0.6, delay: 0.3 }
+        );
+
+        animate(
+        headerDescription,
+        { opacity: [0, 1] },
+        { duration: 0.6, delay: 0.4 }
+        );
+
+  
+    })
+
+</script>

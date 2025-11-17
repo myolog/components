@@ -1,35 +1,41 @@
 ---
+import { Icon } from "astro-icon/components";
 import type { HTMLAttributes } from "astro/types";
 import { cva, type VariantProps } from "class-variance-authority";
 
 export interface Props
 	extends HTMLAttributes<"span">,
-		VariantProps<typeof badgeVariants> {}
+		VariantProps<typeof badgeVariants> {
+			title: string,
+			icon?: string
+		}
 
 const badgeVariants = cva(
-	"inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+	"px-3 py-1 backdrop-blur-xl rounded-full border",
 	{
 		variants: {
 			variant: {
-				default:
-					"border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-				secondary:
-					"border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
-				destructive:
-					"border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-				outline:
-					"text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+				default: "bg-black/90 text-white border-black/30 dark:bg-white/90 dark:text-black dark:border-white/30",
+				arcylic: ""
 			},
+			size: {
+				small: "text-xs",
+				medium: "text-sm",
+				large: "text-md",
+			}
 		},
 		defaultVariants: {
 			variant: "default",
+			size: "medium"
 		},
 	}
 );
 
-const { variant, class: className } = Astro.props;
+const { variant, size, class: className, title, icon } = Astro.props;
+
 ---
 
-<span data-slot="badge" class:list={badgeVariants({ variant, className })}>
-	<slot />
+<span data-slot="badge" class:list={badgeVariants({ variant, size, className })}>
+	{icon && <Icon name={icon}/>}
+	<span>{title}</span>
 </span>

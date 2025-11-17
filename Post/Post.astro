@@ -5,22 +5,20 @@ import { Card } from "@myolog/components/card"
 // 2. Props 인터페이스에서 'theme' prop을 제거합니다.
 interface Props {
 	title: string;
-	excerpt: string;
-	date: string;
-	readTime: string;
+	description: string;
+	publishTime: Date;
 	category: string;
-	imageUrl: string;
+	heroImage: string;
 	featured?: boolean;
 	href?: string;
 }
 
 const {
 	title,
-	excerpt,
-	date,
-	readTime,
+	description,
+	publishTime,
 	category,
-	imageUrl,
+	heroImage,
 	featured = false,
 	href,
 } = Astro.props;
@@ -43,7 +41,7 @@ const selsectorClass = "blog-post-article"
 			]}
 		>
 			<img
-				src={imageUrl}
+				src={heroImage}
 				alt={title}
 				class="blog-post-img w-full h-64 object-cover"
 			/>
@@ -82,7 +80,7 @@ const selsectorClass = "blog-post-article"
 			</h3>
 
 			<p class="mb-4 line-clamp-3 text-black/70 dark:text-white/70">
-				{excerpt}
+				{description}
 			</p>
 
 			<div
@@ -90,11 +88,7 @@ const selsectorClass = "blog-post-article"
 			>
 				<div class="flex items-center gap-1">
 					<Icon name="lucide:calendar" class="w-4 h-4" />
-					<span class="text-sm">{date}</span>
-				</div>
-				<div class="flex items-center gap-1">
-					<Icon name="lucide:clock" class="w-4 h-4" />
-					<span class="text-sm">{readTime}</span>
+					<span class="text-sm">{publishTime.toLocaleDateString()}</span>
 				</div>
 			</div>
 
