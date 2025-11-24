@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./index.ts",
+    "./misc": "./Misc/index.ts",
     "./card": "./Card/index.ts",
     "./breadcrumb": "./Breadcrumb/index.ts",
     "./pagefind": "./Pagefind/index.ts",

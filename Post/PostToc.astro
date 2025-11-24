@@ -1,7 +1,130 @@
 ---
+import { Icon } from "astro-icon/components";
 
+export interface TOCItem {
+	depth: number;
+	slug: string;
+	text: string;
+}
+
+interface Props {
+	headings: TOCItem[];
+}
+
+const { headings } = Astro.props;
+
+// 헤더 레벨에 따른 패딩 클래스 매핑
+const getPaddingClass = (level: number) => {
+	switch (level) {
+		case 2:
+			return "pl-0";
+		case 3:
+			return "pl-4";
+		case 4:
+			return "pl-8";
+		case 5:
+			return "pl-12";
+		case 6:
+			return "pl-16";
+		default:
+			return "pl-0";
+	}
+};
 ---
 
-<div>
-    
+<div
+	class="rounded-2xl backdrop-blur-xl border p-6 bg-black/10 border-black/20 dark:bg-white/10 dark:border-white/20"
+>
+	<div class="flex items-center gap-2 mb-4">
+		<Icon name="lucide:list" class="w-5 h-5 text-black dark:text-white" />
+		<h3 class="text-black dark:text-white font-semibold">목차</h3>
+	</div>
+	<nav>
+		<ul class="space-y-2">
+			{
+				headings.map((item) => (
+					<li>
+						<a
+							href={`#${item.slug}`}
+							class:list={[
+								"toc-link block w-full text-left text-sm transition-all duration-200",
+								"hover:text-black dark:hover:text-white",
+								"text-black/60 dark:text-white/60",
+								getPaddingClass(item.depth),
+							]}
+							data-id={item.slug}
+						>
+							<span class="relative block">
+								<span class="toc-dot absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black dark:bg-white opacity-0 transition-opacity duration-200" />
+								{item.text}
+							</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</nav>
 </div>
+
+<script>
+	// --- Scroll Spy 로직 ---
+
+	const observerOptions = {
+		root: null,
+		rootMargin: "0px 0px -60% 0px", // 화면 상단 100px, 하단 60% 지점을 기준으로 감지
+		threshold: 1.0,
+	};
+
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				setActiveLink(entry.target.id);
+			}
+		});
+	}, observerOptions);
+
+	// 1. 본문의 모든 헤딩 태그를 관찰합니다.
+	// (Markdown 렌더링 결과물 안의 h2, h3... 등을 대상으로 함)
+	const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+	headings.forEach((heading) => observer.observe(heading));
+
+	// 2. 링크 활성화 함수
+	function setActiveLink(id: string) {
+		// 모든 링크 초기화
+		document.querySelectorAll(".toc-link").forEach((link) => {
+			link.classList.remove("is-active"); // 활성 클래스 제거
+
+			// 텍스트 색상 원복 (Inactive)
+			link.classList.remove(
+				"text-black",
+				"dark:text-white",
+				"font-medium"
+			);
+			link.classList.add("text-black/60", "dark:text-white/60");
+
+			// 점 숨기기
+			const dot = link.querySelector(".toc-dot");
+			if (dot) dot.classList.remove("opacity-100");
+			if (dot) dot.classList.add("opacity-0");
+		});
+
+		// 현재 ID에 해당하는 링크 활성화
+		const activeLink = document.querySelector(`.toc-link[data-id="${id}"]`);
+		if (activeLink) {
+			activeLink.classList.add("is-active");
+
+			// 텍스트 색상 강조 (Active)
+			activeLink.classList.remove("text-black/60", "dark:text-white/60");
+			activeLink.classList.add(
+				"text-black",
+				"dark:text-white",
+				"font-medium"
+			);
+
+			// 점 보이기
+			const dot = activeLink.querySelector(".toc-dot");
+			if (dot) dot.classList.remove("opacity-0");
+			if (dot) dot.classList.add("opacity-100");
+		} 
+	}
+</script>
