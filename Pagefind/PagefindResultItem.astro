@@ -3,11 +3,9 @@
 ---
 
 <script>
-	// Define a light, reusable Web Component to render a single search result
 
 import { hover, press, animate } from "motion";
 
-	// It accepts attributes and renders sections only when data exists.
 	class PagefindResultItem extends HTMLElement {
 		static get observedAttributes() {
 			return [
