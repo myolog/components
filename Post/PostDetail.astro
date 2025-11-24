@@ -2,14 +2,17 @@
 import { Icon } from 'astro-icon/components';
 import Badge from '../Common/badge.astro';
 import PostProfile from './PostProfile.astro';
+import PostToc from './PostToc.astro';
+import { Button } from '../Common';
 interface Props {
   title: string;
   publishTime: Date;
   category: string;
   heroImage: string;
+  headings: { depth: number, slug: string, text: string }[]
 }
 
-const { title, publishTime, category, heroImage } = Astro.props;
+const { title, publishTime, category, heroImage, headings} = Astro.props;
 ---
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4 items-start">
@@ -19,14 +22,12 @@ const { title, publishTime, category, heroImage } = Astro.props;
     >
       <div class="relative h-96 overflow-hidden">
         <img src={heroImage} alt={title} class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent"></div>
-        <div class="absolute bottom-6 left-6">
-          <Badge title={category} />
-        </div>
+        <div class="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent"/>
+        <Badge title={category} class="absolute bottom-6 left-6" />
       </div>
 
       <div class="p-8 md:p-12">
-        <h1 class="mb-6 text-black dark:text-white text-3xl">
+        <h1 class="mb-6 text-black dark:text-white text-4xl">
           {title}
         </h1>
 
@@ -43,33 +44,26 @@ const { title, publishTime, category, heroImage } = Astro.props;
         <div class="prose prose-myo dark:prose-invert max-w-none">
           <slot /> 
         </div>
-
+        
         <div class="flex items-center gap-4 mt-12 pt-8 border-t border-black/10 dark:border-white/10">
-          <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
-          >
-            <Icon name="lucide:thumbs-up" class="w-4 h-4" />
-            <span>124</span>
-          </button>
-          <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
-          >
-            <Icon name="lucide:bookmark" class="w-4 h-4" />
-            <span>Save</span>
-          </button>
-          <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-xl border transition-all bg-black/10 border-black/20 hover:bg-black/15 text-black/80 hover:text-black dark:bg-white/10 dark:border-white/20 dark:hover:bg-white/15 dark:text-white/80 dark:hover:text-white"
-          >
-            <Icon name="lucide:share-2" class="w-4 h-4" />
-            <span>Share</span>
-          </button>
+          <Button icon='lucide:thumbs-up' title="124" variant="filled"/>
+          <Button icon='lucide:bookmark' title="Save" variant="filled"/>
+          <Button icon='lucide:share-2' title="Share" variant="filled"/>
         </div>
       </div>
     </article>
+    		<script
+			src="https://utteranc.es/client.js"
+			repo="myolog/myolog-reply"
+			issue-term="title"
+			crossorigin="anonymous"
+			async
+		></script>
   </div>
   <aside
     class="post-sidebar-wrapper hidden lg:block lg:col-span-3 space-y-6 sticky top-20"
   >
+    <PostToc headings={headings}/>
     <PostProfile/>
   </aside>
 </div>
