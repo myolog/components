@@ -30,6 +30,7 @@ export interface Props extends HTMLAttributes<"button">, VariantProps<typeof but
   href?: string
   icon?: string
   iconClass?: string
+  newTab?: boolean
 }
 
 const {
@@ -40,6 +41,7 @@ const {
   title,
   icon,
   iconClass = "",
+  newTab = true,
   ...props
 } = Astro.props;
 
@@ -48,7 +50,7 @@ const classes = buttonVariants({ variant, size, className});
 const Element = href ? 'a' : 'button';
 ---
 
-<Element {...props} class:list={[classes,"myo-btn"]} href={href} target="_blank">
+<Element {...props} class:list={[classes,"myo-btn"]} href={href} target={newTab ? "_blank" : "_self"} >
   {icon && <Icon name={icon} class:list={["w-4 h-4", iconClass]}/>}
   {title && (<span>{title}</span>)}
   <slot/>
