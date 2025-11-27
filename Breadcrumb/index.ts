@@ -1,2 +1,1 @@
-﻿///@ts-nocheck
-export { default as Breadcrumb } from "./Breadcrumb.astro"
+﻿export { default as Breadcrumb } from "./Breadcrumb.astro"
