@@ -19,8 +19,11 @@ type PagefindInstance = {
     options?: Record<string, unknown>
   ) => Promise<{ results: PFResultItem[] }>;
 };
+
 declare global {
-  interface Window { pagefindInstance: PagefindInstance }
+  interface Window {
+    pagefindInstance: PagefindInstance
+  }
 }
 ---
 
@@ -72,6 +75,7 @@ declare global {
       container: $("#pagefind-container"),
       input: $("#pagefind-input"),
       resultScroll: $("#pagefind-result"),
+      searchBtn: $(".search-btn"),
       result: document.querySelector("pagefind-result"),
     };
 
@@ -97,6 +101,14 @@ declare global {
       if (el.pagefind.hidden) openModal();
       else await closeModal();
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if(el.searchBtn) {
+        el.searchBtn.addEventListener("click", () => {
+          openModal()
+        })
+      }
+    })
 
     on(el.backdrop, "click", () => closeModal());
 
@@ -164,7 +176,6 @@ declare global {
     }
 
     window.addEventListener("pagefind:ready", () => {
-      // Ready
     }, { once: true });
   </script>
 
@@ -174,8 +185,6 @@ declare global {
         // @ts-ignore
         const pagefind = await import("/pagefind/pagefind.js");
         await pagefind.init();
-
-        // @ts-ignore
         window.pagefindInstance = pagefind;
         window.dispatchEvent(new Event("pagefind:ready"));
 
