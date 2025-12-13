@@ -67,11 +67,9 @@ const getPaddingClass = (level: number) => {
 </div>
 
 <script>
-	// --- Scroll Spy 로직 ---
-
 	const observerOptions = {
 		root: null,
-		rootMargin: "0px 0px -60% 0px", // 화면 상단 100px, 하단 60% 지점을 기준으로 감지
+		rootMargin: "0px 0px -60% 0px", 
 		threshold: 1.0,
 	};
 
@@ -82,19 +80,13 @@ const getPaddingClass = (level: number) => {
 			}
 		});
 	}, observerOptions);
-
-	// 1. 본문의 모든 헤딩 태그를 관찰합니다.
-	// (Markdown 렌더링 결과물 안의 h2, h3... 등을 대상으로 함)
 	const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
 	headings.forEach((heading) => observer.observe(heading));
 
-	// 2. 링크 활성화 함수
 	function setActiveLink(id: string) {
-		// 모든 링크 초기화
 		document.querySelectorAll(".toc-link").forEach((link) => {
-			link.classList.remove("is-active"); // 활성 클래스 제거
+			link.classList.remove("is-active");
 
-			// 텍스트 색상 원복 (Inactive)
 			link.classList.remove(
 				"text-black",
 				"dark:text-white",
@@ -102,18 +94,15 @@ const getPaddingClass = (level: number) => {
 			);
 			link.classList.add("text-black/60", "dark:text-white/60");
 
-			// 점 숨기기
 			const dot = link.querySelector(".toc-dot");
 			if (dot) dot.classList.remove("opacity-100");
 			if (dot) dot.classList.add("opacity-0");
 		});
 
-		// 현재 ID에 해당하는 링크 활성화
 		const activeLink = document.querySelector(`.toc-link[data-id="${id}"]`);
 		if (activeLink) {
 			activeLink.classList.add("is-active");
 
-			// 텍스트 색상 강조 (Active)
 			activeLink.classList.remove("text-black/60", "dark:text-white/60");
 			activeLink.classList.add(
 				"text-black",
@@ -121,10 +110,34 @@ const getPaddingClass = (level: number) => {
 				"font-medium"
 			);
 
-			// 점 보이기
 			const dot = activeLink.querySelector(".toc-dot");
 			if (dot) dot.classList.remove("opacity-0");
 			if (dot) dot.classList.add("opacity-100");
 		} 
 	}
+
+	document.querySelectorAll(".toc-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault(); // 기본 앵커 이동 막기
+
+            const id = link.getAttribute("data-id");
+            if (!id) return;
+
+            const targetElement = document.getElementById(id);
+            if (targetElement) {
+                const offset = window.innerHeight * 0.075;
+                
+                const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+                
+                const offsetPosition = elementPosition - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth",
+                });
+                
+                history.pushState(null, "", `#${id}`);
+            }
+        });
+    });
 </script>
